@@ -1,9 +1,9 @@
-function getIRIParameterValue(requestedKey){
+function getIRIParameterValue(requestedKey) {
     let pageIRI = window.location.search.substring(1);
     let pageIRIVariables = pageIRI.split('&');
-    for (let i = 0; i < pageIRIVariables.length; i++){
+    for (let i = 0; i < pageIRIVariables.length; i++) {
         let data = pageIRIVariables[i].split('=');
-        if(data[0] == requestedKey){
+        if (data[0] == requestedKey) {
             return data[1];
         }
     }
@@ -11,25 +11,68 @@ function getIRIParameterValue(requestedKey){
 }
 
 let username = decodeURI(getIRIParameterValue('username'));
-if(typeof username == 'undefined' || username === null || username === "null" || !username){
-    username = "Anomynous_" + Math.floor(Math.random()*1000);
+if (typeof username == 'undefined' || username === null || username === "null" || !username) {
+    username = "Anomynous_" + Math.floor(Math.random() * 1000);
 }
 
 let chatRoom = decodeURI(getIRIParameterValue('game_id'));
-if(typeof chatRoom == 'undefined' || chatRoom === null || chatRoom === "null" || !chatRoom){
+if (typeof chatRoom == 'undefined' || chatRoom === null || chatRoom === "null" || !chatRoom) {
     chatRoom = "Lobby";
 }
 let socket = io();
-socket.on('log', function(array){
+socket.on('log', function (array) {
     console.log.apply(console, array);
 });
 
-function makeInviteButton(){
+function makeInviteButton(socket_id) {
     let newHTML = "<button type='button' class='btn btn-outline-primary'>Invite</Button>";
+    let newNode = $(newHTML);
+
+    newNode.click(() => {
+        let payload = {
+            requested_user: socket_id
+        }
+        console.log("**** Client log message, sending 'invite' command" + JSON.stringify(payload));
+        socket.emit('invite', payload)
+    })
+    return newNode;
+}
+
+function makeInvitedButton(socket_id) {
+    let newHTML = "<button type='button' class='btn btn-primary'>Invited</Button>";
+    let newNode = $(newHTML);
+
+    newNode.click(() => {
+        let payload = {
+            requested_user: socket_id
+        }
+        console.log("**** Client log message, sending 'uninvite' command" + JSON.stringify(payload));
+        socket.emit('uninvite', payload)
+    })
+    return newNode;
+}
+
+function makePlayButton(socket_id) {
+    let newHTML = "<button type='button' class='btn btn-success'>Play</Button>";
+    let newNode = $(newHTML);
+
+    newNode.click(() => {
+        let payload = {
+            requested_user: socket_id
+        }
+        console.log("**** Client log message, sending 'game_start' command" + JSON.stringify(payload));
+        socket.emit('game_start', payload)
+    })
+    return newNode;
+}
+
+function makeStartGameButton() {
+    let newHTML = "<button type='button' class='btn btn-danger'>Starting Game</Button>";
     let newNode = $(newHTML);
     return newNode;
 }
-socket.on('join_room_response', (payload)=>{
+
+socket.on('invite_response', (payload) => {
     if (typeof payload == 'undefined' || payload === null) {
         console.log('Server did not send a payload');
         return;
@@ -39,12 +82,69 @@ socket.on('join_room_response', (payload)=>{
         return;
     }
 
-    if (payload.socket_id === socket.id){
+    let newNode = makeInvitedButton(payload.socket_id);
+    $('.socket_' + payload.socket_id + ' button').replaceWith(newNode);
+})
+
+socket.on('invited', (payload) => {
+    if (typeof payload == 'undefined' || payload === null) {
+        console.log('Server did not send a payload');
+        return;
+    }
+    if (payload.result == 'fail') {
+        console.log(payload.message);
+        return;
+    }
+
+    let newNode = makePlayButton(payload.socket_id);
+    $('.socket_' + payload.socket_id + ' button').replaceWith(newNode);
+})
+
+socket.on('uninvited', (payload) => {
+    if (typeof payload == 'undefined' || payload === null) {
+        console.log('Server did not send a payload');
+        return;
+    }
+    if (payload.result == 'fail') {
+        console.log(payload.message);
+        return;
+    }
+
+    let newNode = makeInviteButton(payload.socket_id);
+    $('.socket_' + payload.socket_id + ' button').replaceWith(newNode);
+})
+
+socket.on('game_start_response', (payload) => {
+    if (typeof payload == 'undefined' || payload === null) {
+        console.log('Server did not send a payload');
+        return;
+    }
+    if (payload.result == 'fail') {
+        console.log(payload.message);
+        return;
+    }
+
+    let newNode = makeStartGameButton();
+    $('.socket_' + payload.socket_id + ' button').replaceWith(newNode);
+    window.location.href = 'game.html?username=' + username + '&game_id=' + payload.game_id;
+})
+
+socket.on('join_room_response', (payload) => {
+    if (typeof payload == 'undefined' || payload === null) {
+        console.log('Server did not send a payload');
+        return;
+    }
+    if (payload.result == 'fail') {
+        console.log(payload.message);
+        return;
+    }
+
+    if (payload.socket_id === socket.id) {
         return;
     }
 
     let domElement = $('.socket_' + payload.socket_id)
-    if(domElement.length !== 0){
+    if (domElement.length !== 0) {
         return;
     }
     let nodeA = $("<div></div>");
@@ -58,13 +158,13 @@ socket.on('join_room_response', (payload)=>{
     nodeB.addClass("text-end");
     nodeB.addClass("socket_" + payload.socket_id);
     nodeB.append('<h4>' + payload.username + '</h4>');
-    
+
     let nodeC = $("<div></div>");
     nodeC.addClass("col");
     nodeC.addClass("text-start");
     nodeC.addClass("socket_" + payload.socket_id);
 
-    let buttonC = makeInviteButton();
+    let buttonC = makeInviteButton(payload.socket_id);
     nodeC.append(buttonC);
 
     nodeA.append(nodeB);
@@ -80,14 +180,14 @@ socket.on('join_room_response', (payload)=>{
     newNode.show('fade', 500);
 })
 
-socket.on('player_disconnected', (payload)=>{
+socket.on('player_disconnected', (payload) => {
     if (typeof payload == 'undefined' || payload === null) {
         console.log('Server did not send a payload');
         return;
     }
 
     let domElement = $('.socket_' + payload.socket_id)
-    if(domElement.length !== 0){
+    if (domElement.length !== 0) {
         domElement.hide("fade", 500);
     }
 
@@ -97,10 +197,10 @@ socket.on('player_disconnected', (payload)=>{
     $('#messages').prepend(newNode);
     newNode.show('fade', 500);
 
-    
+
 })
 
-socket.on('send_chat_message_response', (payload)=>{
+socket.on('send_chat_message_response', (payload) => {
     if (typeof payload == 'undefined' || payload === null) {
         console.log('Server did not send a payload');
         return;
@@ -110,14 +210,14 @@ socket.on('send_chat_message_response', (payload)=>{
         return;
     }
 
-    let newHTML = "<p class='chat_message'><b>" + payload.username + "</b>: " + payload.message +"</p>";
+    let newHTML = "<p class='chat_message'><b>" + payload.username + "</b>: " + payload.message + "</p>";
     let newNode = $(newHTML);
     newNode.hide();
     $('#messages').prepend(newNode);
     newNode.show('fade', 500);
 })
 
-function sendChatMessage(){
+function sendChatMessage() {
     let request = {};
     request.room = chatRoom;
     request.username = username;
@@ -128,7 +228,7 @@ function sendChatMessage(){
 }
 
 
-$(()=>{
+$(() => {
     let request = {};
     request.room = chatRoom;
     request.username = username;
@@ -137,11 +237,11 @@ $(()=>{
 
     $('#lobbyTitle').html(username + "'s Lobby");
 
-    $('#chatMessage').keypress(function (e){
+    $('#chatMessage').keypress(function (e) {
         let key = e.which;
-        if(key == 13){
-          $('button[id=chatButton]').click();
-          return false;
+        if (key == 13) {
+            $('button[id=chatButton]').click();
+            return false;
         }
-      })
+    })
 })
