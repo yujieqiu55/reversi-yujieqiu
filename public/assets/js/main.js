@@ -396,6 +396,7 @@ $(() => {
     console.log("**** Client log message, sending 'join_room' command" + JSON.stringify(request));
     socket.emit('join_room', request);
 
+    $('#game_over').hide();
     $('#lobbyTitle').html(username + "'s Lobby");
     $('#quit').html("<a href='lobby.html?username=" + username + "' class='btn btn-danger' role='button'>Quit</a>");
 
