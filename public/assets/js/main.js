@@ -218,17 +218,18 @@ socket.on('send_chat_message_response', (payload) => {
 })
 
 let old_board = [
-    ['?', '?', '?', '?', '?', '?', '?', '?'],
-    ['?', '?', '?', '?', '?', '?', '?', '?'],
-    ['?', '?', '?', '?', '?', '?', '?', '?'],
-    ['?', '?', '?', '?', '?', '?', '?', '?'],
-    ['?', '?', '?', '?', '?', '?', '?', '?'],
-    ['?', '?', '?', '?', '?', '?', '?', '?'],
-    ['?', '?', '?', '?', '?', '?', '?', '?'],
-    ['?', '?', '?', '?', '?', '?', '?', '?']
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
 ]
 
 let my_color = "";
+let interval_timer;
 
 socket.on('game_update', (payload) => {
     if (typeof payload == 'undefined' || payload === null) {
@@ -246,98 +247,120 @@ socket.on('game_update', (payload) => {
         return;
     }
 
-    if(socket.id === payload.game.player_blue.socket){
+    if (socket.id === payload.game.player_blue.socket) {
         my_color = 'blue';
     }
-    else if(socket.id === payload.game.player_yellow.socket){
+    else if (socket.id === payload.game.player_yellow.socket) {
         my_color = 'yellow';
-    } 
-    else{
+    }
+    else {
         window.location.href = "lobby.html?username=" + username;
         return;
     }
 
     $("#my_color").html('<h3 id="<my_color">I am ' + my_color + '</h3>');
 
+    if (payload.game.whose_turn === 'blue') {
+        $("#my_color").append('<h4>It is Blue\'s turn</h4>');
+    }
+    else if (payload.game.whose_turn === 'yellow') {
+        $("#my_color").append('<h4>It is Yellow\'s turn</h4>');
+    }
+
     let blueSum = 0;
     let yellowSum = 0;
 
-    for(let row = 0; row < 8; row++){
-        for(let col = 0; col < 8; col++){
-            if(board[row][col] === 'b'){
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            if (board[row][col] === 'b') {
                 blueSum++;
             }
-            else if(board[row][col] === 'y'){
+            else if (board[row][col] === 'y') {
                 yellowSum++;
             }
 
-            if(old_board[row][col] != board[row][col]){
+            if (old_board[row][col] != board[row][col]) {
                 let graphic = "";
                 let altTag = "";
-                if(old_board[row][col] === '?' && board[row][col] === ' '){
-                    graphic = 'empty.gif';
-                    altTag = 'empty space';
-                }
-                else if(old_board[row][col] === '?' && board[row][col] === 'b'){
+                if (old_board[row][col] === ' ' && board[row][col] === 'b') {
                     graphic = 'empty_to_blue.gif';
                     altTag = 'blue token';
                 }
-                else if(old_board[row][col] === '?' && board[row][col] === 'y'){
+                else if (old_board[row][col] === ' ' && board[row][col] === 'y') {
                     graphic = 'empty_to_yellow.gif';
                     altTag = 'yellow token';
                 }
-                else if(old_board[row][col] === ' ' && board[row][col] === 'b'){
-                    graphic = 'empty_to_blue.gif';
-                    altTag = 'blue token';
-                }
-                else if(old_board[row][col] === ' ' && board[row][col] === 'y'){
-                    graphic = 'empty_to_yellow.gif';
-                    altTag = 'yellow token';
-                }
-                else if(old_board[row][col] === 'b' && board[row][col] === ' '){
+                else if (old_board[row][col] === 'b' && board[row][col] === ' ') {
                     graphic = 'blue_to_empty.gif';
                     altTag = 'empty space';
                 }
-                else if(old_board[row][col] === 'y' && board[row][col] === ' '){
+                else if (old_board[row][col] === 'y' && board[row][col] === ' ') {
                     graphic = 'empty_to_yellow.gif';
                     altTag = 'empty space';
                 }
-                else if(old_board[row][col] === 'y' && board[row][col] === 'b'){
+                else if (old_board[row][col] === 'y' && board[row][col] === 'b') {
                     graphic = 'yellow_to_blue.gif';
                     altTag = 'blue token';
                 }
-                else if(old_board[row][col] === 'b' && board[row][col] === 'y'){
+                else if (old_board[row][col] === 'b' && board[row][col] === 'y') {
                     graphic = 'blue_to_yellow.gif';
                     altTag = 'yellow token';
                 }
-                else{
+                else {
                     graphic = 'error.gif';
                     altTag = "Error";
                 }
 
-                $('#' + row + '_' + col).html("<img class=\"img-fluid\" src=\"assets/images/"+graphic+"?time=" + Date.now() + "\" alt=\"" + altTag + "\" />");
-                $('#' + row + '_' + col).off("click");
-                if (board[row][col] === ' '){
+                $('#' + row + '_' + col).html("<img class=\"img-fluid\" src=\"assets/images/" + graphic + "?time=" + Date.now() + "\" alt=\"" + altTag + "\" />");
+            }
+
+            $('#' + row + '_' + col).off("click");
+            $('#' + row + '_' + col).removeClass('hovered_over');
+
+            if (payload.game.whose_turn === my_color) {
+                if (payload.game.legal_moves[row][col] === my_color.substring(0, 1)) {
                     $('#' + row + '_' + col).addClass('hovered_over');
                     $('#' + row + '_' + col).click(((r, c) => {
-                        return (()=>{
+                        return (() => {
                             let payload = {
-                                row : r,
-                                column : c,
-                                color : my_color
+                                row: r,
+                                column: c,
+                                color: my_color
                             };
                             console.log("**** Client log message, sending 'play_token' command" + JSON.stringify(payload));
                             socket.emit('play_token', payload);
                         });
-                    }) (row, col));
+                    })(row, col));
                 }
-                else{
-                    $('#' + row + '_' + col).removeClass('hovered_over');
 
-                }
             }
         }
     }
+
+    clearInterval(interval_timer);
+    interval_timer = setInterval(((last_time)=>{
+        return (()=>{
+            let d = new Date();
+            let elapase_m = d.getTime() - last_time;
+            let minutes = Math.floor((elapase_m/1000) / 60);
+            let seconds = Math.floor(elapase_m % (60 * 1000) / 1000);
+            let total = minutes * 60 + seconds;
+            let timestring = ""+seconds;
+            timestring = timestring.padStart(2, '0');
+            timestring = minutes + ":" + timestring;
+            if(total>100){
+                total = 100;
+            }
+            $("#elapsed").css('width', total + '%').attr('aria-valuenow', total);
+            if(total >= 100){
+                $("#elapsed").html("Times up!");
+            }else{
+                $("#elapsed").html(timestring);
+            }
+        })
+    })(payload.game.last_move_time), 1000);
+
+
     $('#bluesum').html(blueSum);
     $('#yellowsum').html(yellowSum);
     old_board = board;
@@ -373,6 +396,7 @@ socket.on("play_token_response", payload => {
     }
     if (payload.result == 'fail') {
         console.log(payload.message);
+        alert(payload.message);
         return;
     }
 })
@@ -396,7 +420,6 @@ $(() => {
     console.log("**** Client log message, sending 'join_room' command" + JSON.stringify(request));
     socket.emit('join_room', request);
 
-    $('#game_over').hide();
     $('#lobbyTitle').html(username + "'s Lobby");
     $('#quit').html("<a href='lobby.html?username=" + username + "' class='btn btn-danger' role='button'>Quit</a>");
 
