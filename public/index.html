@@ -12,8 +12,39 @@
 
   <style>
     body {
-      background-color: grey;
+      background-color: black;
+      font-family: 'Poppins';
+      font-style: normal;
     }
+
+    #small-logo #hovered-logo{
+      display:none;
+    }
+
+    #small-logo:hover #hovered-logo{
+      display:inline;
+    }
+
+    #small-logo #not-hovered-logo{
+      display:inline;
+    }
+
+    #small-logo:hover #not-hovered-logo{
+      display:none;
+    }
+
+    #about-btn{
+      color : white;
+    }
+
+    #rules-btn{
+      color : white;
+    }
+
+    #enter-row{
+      padding: 100px 0%;
+    }
+
   </style>
   <title>MyReversiGame</title>
 </head>
@@ -21,20 +52,32 @@
 <body>
   <div class="container-fluid">
     <div class="row m-3">
-      <div class="col text-center">
-        <a class="btn btn-success text-nowrap" href="about.html">About</a>
+      <div class="col-3" id="small-logo">
+        <img class="img-fluid" id="not-hovered-logo" src="assets/images/small-logo.png" alt="Reversi Small Logo">
+        <img class="img-fluid" id="hovered-logo" src="assets/images/small-logo-hover.png" alt="Reversi Small Logo">
       </div>
-      <div class="col text-center">
-        <a class="btn btn-success text-nowrap" href="https://en.wikipedia.org/wiki/Reversi">Rules</a>
+      <div class="col-5"></div>
+      <div class="col-2 text-right">
+        <a class="btn text-nowrap" id="about-btn" href="about.html">About</a>
+      </div>
+      <div class="col-2 text-left">
+        <a class="btn text-nowrap" id="rules-btn" href="https://en.wikipedia.org/wiki/Reversi">Rules</a>
       </div>
     </div>
-    <div class="row m-3">
-      <div class="col text-center">
-        <img class="img-fluid" src="assets/images/top-splash.png" alt="Reversi Logo 1" />
+    <div class="row m-2">
+      <div class="col"></div>
+      <div class="col-10"><hr style="color: #D9D9D9;"></div>
+      <div class="col"></div>
+    </div>
+    <div class="row m-3" id="top-logo">
+      <div class="col-2"></div>
+      <div class="col-8 text-center">
+        <img class="img-fluid" src="assets/images/homepage-logo.png" alt="Reversi Logo 1" />
       </div>
+      <div class="col-2"></div>
     </div>
 
-    <div class="row align-items-center justify-content-center m-3">
+    <div class="row align-items-center justify-content-center m-3" id="enter-row">
       <div class="col-8">
         <div class="input-group">
           <span class="input-group-text" id="displayName">Name</span>
@@ -48,7 +91,7 @@
 
     <div class="row m-3">
       <div class="col text-center">
-        <img class="img-fluid" src="assets/images/bottom-splash.png" alt="Reversi Logo 2" />
+        <img class="img-fluid" src="assets/images/home-bot-image.png" alt="Reversi Logo 2" />
       </div>
     </div>
   </div>
