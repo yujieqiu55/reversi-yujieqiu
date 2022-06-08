@@ -53,7 +53,7 @@ function makeInvitedButton(socket_id) {
 }
 
 function makePlayButton(socket_id) {
-    let newHTML = "<button type='button' class='btn btn-success'>Play</Button>";
+    let newHTML = "<button type='button' class='btn' style='background-color:white;color:black;'>Play</Button>";
     let newNode = $(newHTML);
 
     newNode.click(() => {
@@ -258,13 +258,13 @@ socket.on('game_update', (payload) => {
         return;
     }
 
-    $("#my_color").html('<h3 id="<my_color">I am ' + my_color + '</h3>');
+    $("#my_color").html('<h3 id="<my_color">I am <span class="' +  my_color + '">' + my_color + '</span></h3>');
 
     if (payload.game.whose_turn === 'blue') {
-        $("#my_color").append('<h4>It is Blue\'s turn</h4>');
+        $("#my_color").append('<h4>It is <span class="blue">Blue\'s</span> turn</h4>');
     }
     else if (payload.game.whose_turn === 'yellow') {
-        $("#my_color").append('<h4>It is Yellow\'s turn</h4>');
+        $("#my_color").append('<h4>It is <span class="yellow">Yellow\'s</span> turn</h4>');
     }
 
     let blueSum = 0;
@@ -379,7 +379,13 @@ socket.on("game_over", payload => {
 
     let nodeA = $("<div id=game_over'></div>");
     let nodeB = $("<h1>Game Over</h1>");
-    let nodeC = $("<h2>" + payload.who_won + " won!</h2>");
+    let nodeC;
+    if(payload.who_won == 'blue'){
+        nodeC = $('<h2><span class="blue">Blue</span>  won!</h2>');
+    }
+    else if(payload.who_won == 'yellow'){
+        nodeC = $('<h2><span class="yellow">Yellow</span>  won!</h2>');
+    }
     let nodeD = $("<a href='lobby.html?username=" + username + "' class='btn btn-lg btn-success' role='button'>Return to lobby</a>");
     nodeA.append(nodeB);
     nodeA.append(nodeC);
@@ -421,7 +427,7 @@ $(() => {
     socket.emit('join_room', request);
 
     $('#lobbyTitle').html(username + "'s Lobby");
-    $('#quit').html("<a href='lobby.html?username=" + username + "' class='btn btn-danger' role='button'>Quit</a>");
+    $('#quit').html("<a href='lobby.html?username=" + username + "' class='btn' id='quit-button' role='button'>Quit</a>");
 
     $('#chatMessage').keypress(function (e) {
         let key = e.which;

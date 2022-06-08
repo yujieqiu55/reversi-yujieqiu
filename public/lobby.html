@@ -11,24 +11,54 @@
     integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 
   <style>
-    .headerrow {
-      background-color: darkseagreen;
+    body {
+      background-color: black;
+      color : white;
+      font-family: 'Poppins';
+      font-style: normal;
+    }
+
+    #small-logo #hovered-logo{
+      display:none;
+    }
+
+    #small-logo:hover #hovered-logo{
+      display:inline;
+    }
+
+    #small-logo #not-hovered-logo{
+      display:inline;
+    }
+
+    #small-logo:hover #not-hovered-logo{
+      display:none;
+    }
+
+    #about-btn{
+      color : white;
+    }
+
+    #rules-btn{
+      color : white;
     }
 
     #messagePane {
-      background-color: rgb(140, 240, 168);
+      background-color: rgba(255, 255, 255, 0.15);
+      color : #D4D4D4;
     }
 
     .join_room_response,
     .left_room_response{
-      background-color: rgb(241, 205, 205);
       margin : 0px;
     }
 
     .chat_message {
       font-size: 125%;
-      color: rgb(50, 84, 196);
       margin : 0px;
+    }
+
+    ::placeholder{
+      color:#747373;
     }
   </style>
   <title>Reversi: Lobby</title>
@@ -36,36 +66,55 @@
 
 <body>
   <div class="container-fluid">
-    <div class="row m-3 headerrow">
-      <div class="col text-center">
+    <div class="row m-3">
+      <div class="col-1"></div>
+      <div class="col-2" id="small-logo">
+        <a href="index.html">
+          <img class="img-fluid" id="not-hovered-logo" src="assets/images/small-logo.png" alt="Reversi Small Logo">
+          <img href="index.html" class="img-fluid" id="hovered-logo" src="assets/images/small-logo-hover.png" alt="Reversi Small Logo">
+        </a>
+      </div>
+      <div class="col-6"></div>
+      <div class="col-2">
+        <div class="row justify-content-end">
+          <div class="col">
+            <a class="btn text-nowrap" id="about-btn" href="about.html">About</a>
+          </div>
+          <div class="col">
+          <a class="btn text-nowrap" id="rules-btn" href="https://en.wikipedia.org/wiki/Reversi">Rules</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-1"></div>
+    </div>
+    <div class="row m-2">
+      <div class="col-1"></div>
+      <div class="col-10"><hr style="color: #D9D9D9;"></div>
+      <div class="col-1"></div>
+    </div>
+
+    <div class="row m-3 text-center">
+      <div class="col-6">
         <h3 id="lobbyTitle">Lobby</h3>
+      </div>
+      <div class="col-4">
+        <h3>Messages</h3>
       </div>
     </div>
 
-    <div class="row m-3">
-      <div class="col">
-        <div class="row align-items-start justify-content-center m-3">
-          <div class="col-md-4">
-            <h4>Players</h4>
+    <div class="row align-items-start justify-content-center m-3">
+          <div class="col-6">
             <div id="players" class="align-items-end text-right m3"></div>
           </div>
-          <div class="col-md-8" id="messagePane">
-            <div><h4>Messages</h4></div>
+          <div class="col-4" id="messagePane">
             <div class="input-group">
               <input type="text" class="form-control text-nowrap" id="chatMessage" placeholder="Enter your message here"
-                aria-label="Enter your message to send in chat room" />
+                aria-label="Enter your message to send in chat room" style="background-color:rgba(255, 255, 255, 0.2);;"/>
               <button type="submit" class="btn btn-primary text-nowrap" id="chatButton"
                 onclick="sendChatMessage()">Send</button>
             </div>
             <div id="messages"></div>
           </div>
-        </div>
-      </div>
-    </div>
-    <div class="row m-3">
-      <div class="col text-center">
-        <a href="index.html" class="btn btn-success text-nowrap">Back to Main</a>
-      </div>
     </div>
   </div>
 
